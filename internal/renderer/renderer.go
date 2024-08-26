@@ -1,10 +1,11 @@
 package renderer
 
 import (
-	"github.com/labstack/echo/v4"
-	"github.com/salehrashid/mini-project/internal/util"
 	"html/template"
 	"io"
+
+	"github.com/labstack/echo/v4"
+	"github.com/salehrashid/mini-project/internal/util"
 )
 
 type Renderer struct {
@@ -13,7 +14,7 @@ type Renderer struct {
 	Location string
 }
 
-type DynamicTitle struct {
+type TemplateModel struct {
 	Title string
 }
 
