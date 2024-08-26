@@ -28,7 +28,7 @@ func NewTemplateRenderer(debug bool) *Renderer {
 }
 
 func (renderer *Renderer) ReloadTemplates() {
-	renderer.Template = template.Must(template.ParseGlob(getTemplateDirectory()))
+	renderer.Template = template.Must(template.New("t").Funcs(funcMap()).ParseGlob(getTemplateDirectory()))
 }
 
 func (renderer *Renderer) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
@@ -36,6 +36,15 @@ func (renderer *Renderer) Render(w io.Writer, name string, data interface{}, c e
 		renderer.ReloadTemplates()
 	}
 	return renderer.Template.ExecuteTemplate(w, name, data)
+}
+
+//variable passer to template / html
+func funcMap() template.FuncMap{
+	return template.FuncMap{
+		"getPageTitle": func(templateData TemplateModel) string {
+			return templateData.Title
+		},
+	}
 }
 
 func getTemplateDirectory() string {
