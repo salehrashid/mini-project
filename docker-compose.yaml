@@ -11,16 +11,3 @@ services:
       - .env
     volumes:
       - .:/go/src/github.com/salehrashid/mini-project
-  # nginx:
-  #   build:
-  #     context: ./docker
-  #     dockerfile: nginx/Dockerfile
-  #   env_file:
-  #     - .env
-  #   ports:
-  #     - ${DOCKER_NGINX_HOST_PORT}:443
-  #   # volumes:
-  #   #   - ./nginx/nginx.conf:/go/src/github.com/salehrashid/portfolio-saleh/docker/nginx/conf/nginx.conf
-  #   #   - ./certs:/etc/nginx/certs
-  #   depends_on:
-  #     - web_portfolio
