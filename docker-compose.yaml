@@ -11,3 +11,18 @@ services:
       - .env
     volumes:
       - .:/go/src/github.com/salehrashid/mini-project
+  
+  postgresql:
+      image: postgres:latest
+      container_name: postgresql
+      environment:
+        POSTGRES_USER: user
+        POSTGRES_PASSWORD: password
+        POSTGRES_DB: database
+      ports:
+        - "${DOCKER_POSTGRESQL_HOST_PORT}:5432"
+      volumes:
+        - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
