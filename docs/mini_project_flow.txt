@@ -1,0 +1,23 @@
+1. **Creator**:
+   - Initiates `docker-compose up`.
+
+2. **Docker Compose**:
+   - Starts the `web_mini_project` service.
+   - Pulls the base image (if not already available locally).
+   - Executes the `Dockerfile`.
+
+3. **Dockerfile**:
+   - Builds the Go application container.
+   - Installs dependencies (`apk add`).
+   - Sets up the working directory (`WORKDIR`).
+   - Executes `CMD go run main.go`.
+
+4. **Go Application**:
+   - The `main.go` file is executed.
+   - Initializes an Echo server.
+   - Registers routes and middleware.
+   - Starts the HTTP server.
+
+5. **End User**:
+   - Sends a request (e.g., `GET /` or `GET /assets`).
+   - Echo server processes the request, serving HTML or static assets as defined.

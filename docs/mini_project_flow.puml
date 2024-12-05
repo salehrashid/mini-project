@@ -1,0 +1,21 @@
+@startuml mini_project
+actor User as "Creator"
+participant "Docker Compose"
+participant "Dockerfile"
+participant "Go Application"
+actor "End User"
+
+User -> "Docker Compose" : docker-compose up
+"Docker Compose" -> "Dockerfile" : Start service
+"Dockerfile" -> "Dockerfile" : Install dependencies\n(apk add, etc.)
+"Dockerfile" -> "Dockerfile" : Set WORKDIR
+"Dockerfile" -> "Go Application" : Execute CMD\n(go run main.go)
+
+"Go Application" -> "Go Application" : Initialize Echo server
+"Go Application" -> "Go Application" : Register routes & middleware
+"Go Application" -> "Go Application" : Start HTTP server
+
+"End User" -> "Go Application" : Send HTTP request (e.g., GET /)
+"Go Application" -> "End User" : Respond with HTML/static assets
+
+@enduml
