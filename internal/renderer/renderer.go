@@ -6,42 +6,29 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/salehrashid/mini-project/internal/util"
+	model "github.com/salehrashid/mini-project/pkg/model"
+
 )
 
-type Renderer struct {
+type TemplateRenderer struct {
 	Template *template.Template
-	Debug    bool
 	Location string
 }
 
-type TemplateModel struct {
-	Title string
-}
-
-func NewTemplateRenderer(debug bool) *Renderer {
-	t := new(Renderer)
-	t.Debug = debug
-
-	t.ReloadTemplates()
-
-	return t
-}
-
-func (renderer *Renderer) ReloadTemplates() {
-	renderer.Template = template.Must(template.New("t").Funcs(funcMap()).ParseGlob(getTemplateDirectory()))
-}
-
-func (renderer *Renderer) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
-	if renderer.Debug {
-		renderer.ReloadTemplates()
+func NewTemplateRenderer() *TemplateRenderer {
+	return &TemplateRenderer{
+		Template: template.Must(template.New("t").Funcs(funcMap()).ParseGlob(getTemplateDirectory())),
 	}
+}
+
+func (renderer *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
 	return renderer.Template.ExecuteTemplate(w, name, data)
 }
 
 //variable passer to template / html
 func funcMap() template.FuncMap{
 	return template.FuncMap{
-		"getPageTitle": func(templateData TemplateModel) string {
+		"getPageTitle": func(templateData model.TemplateModel) string {
 			return templateData.Title
 		},
 	}
