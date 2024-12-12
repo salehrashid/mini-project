@@ -35,7 +35,7 @@ func main() {
 
 	// Initialize the HTTP transport layer and register the routes.
 	// The transport handles route definitions and their corresponding handlers.
-	transport := transport.MakeHTTPTransport(*logger)
+	transport := transport.MakeHTTPTransport(logger)
 	transport.RouterRegister(e)
 	transport.GetErrorHTTPTransport().RouterRegister(e)
 

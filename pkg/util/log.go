@@ -6,41 +6,46 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 /*
-To wrap the Logger function into a struct, we can encapsulate the logger 
-configuration and the middleware setup into a struct with methods for 
-initialization and setup. 
+To wrap the Logger function into a struct, we can encapsulate the logger
+configuration and the middleware setup into a struct with methods for
+initialization and setup.
 */
 
 // AppLogger wraps the zap logger and middleware configuration
 type AppLogger struct {
 	logger *zap.Logger
-	config zap.Config
 }
 
 // NewAppLogger initializes and returns a new AppLogger instance
-func NewAppLogger() (*AppLogger, error) {
+func NewAppLogger() (AppLogger, error) {
+	// Custom zap configuration
 	config := zap.Config{
-		Level:            zap.NewAtomicLevelAt(zap.DebugLevel),
-		Development:      true,
-		Encoding:         "json",
-		EncoderConfig:    zap.NewDevelopmentEncoderConfig(),
+		Level:       zap.NewAtomicLevelAt(zap.DebugLevel),
+		Development: true,
+		Encoding:    "json",
+		EncoderConfig: zapcore.EncoderConfig{
+			TimeKey:        "TIME",
+			LevelKey:       "LEVEL",
+			CallerKey:      "CALLER",
+			MessageKey:     "MESSAGE",
+			EncodeLevel:    zapcore.CapitalLevelEncoder,
+			EncodeCaller:   zapcore.ShortCallerEncoder,
+			EncodeTime:     zapcore.ISO8601TimeEncoder,
+		},
 		OutputPaths:      []string{"stdout"},
 		ErrorOutputPaths: []string{"stderr"},
-		DisableStacktrace: true,
 	}
 
-	logger, err := config.Build()
+	logger, err := config.Build(zap.AddCaller(), zap.AddCallerSkip(1)) // Skip 1 frame
 	if err != nil {
-		return nil, err
+		return AppLogger{}, err
 	}
 
-	return &AppLogger{
-		logger: logger,
-		config: config,
-	}, nil
+	return AppLogger{logger: logger}, nil
 }
 
 // AttachMiddleware attaches the logging middleware to the Echo instance
@@ -86,50 +91,21 @@ func (al *AppLogger) AttachMiddleware(e *echo.Echo) {
 }
 
 func (al AppLogger) Error(msg string, fields ...zap.Field) {
-	switch len(fields) {
-	case 0:
-		// No fields provided; log the message alone
-		al.logger.Error(msg)
-	default:
-		// Fields are provided; log the message with fields
-		al.logger.Error(msg, fields...)
-	}
+	al.logger.Error(msg, fields...)
 }
 
 func (al AppLogger) Fatal(msg string, fields ...zap.Field) {
-	switch len(fields) {
-	case 0:
-		al.logger.Fatal(msg)
-	default:
-		al.logger.Fatal(msg, fields...)
-	}
+	al.logger.Fatal(msg, fields...)
 }
 
 func (al AppLogger) Info(msg string, fields ...zap.Field) {
-	switch len(fields) {
-	case 0:
-		al.logger.Info(msg)
-	default:
-		al.logger.Info(msg, fields...)
-	}
+	al.logger.Info(msg, fields...)
 }
 
 func (al AppLogger) DPanic(msg string, fields ...zap.Field) {
-	switch len(fields) {
-	case 0:
-		al.logger.DPanic(msg)
-	default:
-		al.logger.DPanic(msg, fields...)
-	}
+	al.logger.DPanic(msg, fields...)
 }
 
 func (al AppLogger) Debug(msg string, fields ...zap.Field) {
-	switch len(fields) {
-	case 0:
-		al.logger.Debug(msg)
-	default:
-		al.logger.Debug(msg, fields...)
-	}
+	al.logger.Debug(msg, fields...)
 }
-
-
