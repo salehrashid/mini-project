@@ -13,16 +13,25 @@ services:
       - .:/go/src/github.com/salehrashid/mini-project
   
   postgresql:
-      image: postgres:latest
-      container_name: postgresql
-      environment:
-        POSTGRES_USER: user
-        POSTGRES_PASSWORD: password
-        POSTGRES_DB: database
-      ports:
-        - "${DOCKER_POSTGRESQL_HOST_PORT}:5432"
-      volumes:
-        - postgres_data:/var/lib/postgresql/data
+    image: postgres:latest
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DATABASE}
+    ports:
+      - "${DOCKER_POSTGRESQL_HOST_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  migrate:
+    image: migrate/migrate
+    entrypoint: ["migrate", "-path", "scripts/sql", "-database", "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgresql:${DOCKER_POSTGRESQL_HOST_PORT}/${POSTGRES_DATABASE}?sslmode=disable", "up"]
+    volumes:
+      - ./scripts/sql:/scripts/sql
+    depends_on:
+      - postgresql
 
 volumes:
   postgres_data:
