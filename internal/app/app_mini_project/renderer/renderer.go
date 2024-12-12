@@ -5,7 +5,7 @@ import (
 	"io"
 
 	"github.com/labstack/echo/v4"
-	"github.com/salehrashid/mini-project/internal/util"
+	"github.com/salehrashid/mini-project/internal/app/app_mini_project/util"
 	model "github.com/salehrashid/mini-project/pkg/model"
 
 )

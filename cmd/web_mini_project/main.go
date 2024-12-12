@@ -4,9 +4,9 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
-	"github.com/salehrashid/mini-project/internal/renderer"
-	"github.com/salehrashid/mini-project/internal/transport"
-	util "github.com/salehrashid/mini-project/internal/util"
+	"github.com/salehrashid/mini-project/internal/app/app_mini_project/renderer"
+	"github.com/salehrashid/mini-project/internal/app/app_mini_project/transport"
+	util "github.com/salehrashid/mini-project/internal/app/app_mini_project/util"
 	logger "github.com/salehrashid/mini-project/pkg/util"
 )
 
