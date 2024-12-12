@@ -23,7 +23,7 @@ func main() {
 	e.Static("/assets", util.GetString("WEB_MINI_PROJECT_FILE_STATICS_PATH", "../../../web/static"))
 
 	// Add middleware to log all HTTP requests for debugging and analysis.
-	logger.Logger(e)
+	logger, _ := logger.NewAppLogger()
 
 	// Add middleware to recover from panics and log the errors.
 	e.Use(middleware.RecoverWithConfig(middleware.RecoverConfig{
@@ -31,10 +31,13 @@ func main() {
 		LogLevel:  log.ERROR,
 	}))
 
+	logger.AttachMiddleware(e)
+
 	// Initialize the HTTP transport layer and register the routes.
 	// The transport handles route definitions and their corresponding handlers.
-	transport := transport.MakeHTTPTransport()
+	transport := transport.MakeHTTPTransport(*logger)
 	transport.RouterRegister(e)
+	transport.GetErrorHTTPTransport().RouterRegister(e)
 
 	// Start the HTTP server on the specified port and log any fatal errors.
 	e.Logger.Fatal(e.Start(util.GetPort("DOCKER_WEB_MINI_PROJECT_HOST_PORT")))

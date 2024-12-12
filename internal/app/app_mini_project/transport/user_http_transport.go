@@ -23,7 +23,7 @@ func (t userhttpTransport) RouterRegister(e *echo.Echo) {
 
 func (t userhttpTransport) root(c echo.Context) error {
 	return c.Render(http.StatusOK, "index.html", echo.Map{
-		"Template": model.TemplateModel{
+		"TemplateData": model.TemplateModel{
 			Title: "Home",
 		},
 	})

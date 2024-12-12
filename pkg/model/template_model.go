@@ -1,5 +1,6 @@
 package model
 
 type TemplateModel struct {
-	Title string
+	Title     string
+	PageTitle string
 }
