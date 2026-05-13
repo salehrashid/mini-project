@@ -25,6 +25,8 @@ type httpTransport struct {
 	publicUtil.AppLogger
 
 	UserHTTPTransport // Embedded struct to handle user-specific routes.
+	LoginHTTPTransport
+	RegisterHTTPTransport
 	internalTransport.ErrorHTTPTransport
 }
 
@@ -33,28 +35,40 @@ type httpTransport struct {
 func MakeHTTPTransport(logger publicUtil.AppLogger) HTTPTransport {
 	return httpTransport{
 		ErrorHTTPTransport: internalTransport.MakeErrorHTTPTransport(logger),
+
 		UserHTTPTransport: MakeUserHTTPTransport(),
+		LoginHTTPTransport: MakeLoginHTTPTransport(),
+		RegisterHTTPTransport: MakeRegisterHTTPTransport(),
 	}
 }
 
 // RouterRegister registers HTTP routes for the httpTransport.
-// It sets up the root route and delegates additional route registration to UserHTTPTransport and etc.
+// It sets up the dashboard route and delegates additional route registration to UserHTTPTransport and etc.
 func (t httpTransport) RouterRegister(e *echo.Echo) {
-	// Register the root route that serves the home page.
+	// Register the dashboard route that serves the home page.
+	e.GET("/dashboard", t.dashboard)
 	e.GET("/", t.root)
 
 	// Delegate route registration to the embedded UserHTTPTransport and etc.
 	t.UserHTTPTransport.RouterRegister(e)
+	t.LoginHTTPTransport.RouterRegister(e)
+	t.RegisterHTTPTransport.RouterRegister(e)
+}
+
+// dashboard is the handler function for the dashboard route ("/").
+// It renders the "dashboard.html" template with a title passed as data.
+func (t httpTransport) dashboard(c echo.Context) error {
+	return c.Render(http.StatusOK, "dashboard.html", echo.Map{
+		"TemplateData": model.TemplateModel{
+			Title: "Dashboard", // Page title to be displayed in the template.
+		},
+	})
 }
 
 // root is the handler function for the root route ("/").
-// It renders the "index.html" template with a title passed as data.
+// It redirects to the dashboard page.
 func (t httpTransport) root(c echo.Context) error {
-	return c.Render(http.StatusOK, "index.html", echo.Map{
-		"TemplateData": model.TemplateModel{
-			Title: "Home", // Page title to be displayed in the template.
-		},
-	})
+	return c.Redirect(http.StatusSeeOther, "/dashboard")
 }
 
 func (t httpTransport) GetErrorHTTPTransport() internalTransport.ErrorHTTPTransport{
