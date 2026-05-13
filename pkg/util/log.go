@@ -28,13 +28,13 @@ func NewAppLogger() (AppLogger, error) {
 		Development: true,
 		Encoding:    "json",
 		EncoderConfig: zapcore.EncoderConfig{
-			TimeKey:        "TIME",
-			LevelKey:       "LEVEL",
-			CallerKey:      "CALLER",
-			MessageKey:     "MESSAGE",
-			EncodeLevel:    zapcore.CapitalLevelEncoder,
-			EncodeCaller:   zapcore.ShortCallerEncoder,
-			EncodeTime:     zapcore.ISO8601TimeEncoder,
+			TimeKey:       "TIME",
+			LevelKey:      "LEVEL",
+			CallerKey:     "CALLER",
+			MessageKey:    "MESSAGE",
+			EncodeLevel:   zapcore.CapitalLevelEncoder,
+			EncodeCaller:  zapcore.ShortCallerEncoder,
+			EncodeTime:    zapcore.ISO8601TimeEncoder,
 		},
 		OutputPaths:      []string{"stdout"},
 		ErrorOutputPaths: []string{"stderr"},
@@ -67,13 +67,20 @@ func (al *AppLogger) AttachMiddleware(e *echo.Echo) {
 			// Log message dynamically
 			logMessage := zap.String("STATUS_MESSAGE", http.StatusText(v.Status))
 			if v.Status >= 400 && v.Status < 600 {
-				al.logger.Error("REQUEST",
+				fields := []zap.Field{
 					zap.String("URI", v.URI),
 					zap.Int("STATUS", v.Status),
 					logMessage,
 					zap.String("METHOD", c.Request().Method),
 					zap.String("SESSION_ID", sessionID),
 					zap.String("SESSION_TOKEN", sessionToken),
+				}
+				if v.Error != nil {
+					fields = append(fields, zap.NamedError("ERROR", v.Error))
+				}
+
+				al.logger.Error("REQUEST",
+					fields...,
 				)
 			} else if v.Status >= 200 && v.Status < 300 {
 				al.logger.Debug("REQUEST",
@@ -91,21 +98,34 @@ func (al *AppLogger) AttachMiddleware(e *echo.Echo) {
 }
 
 func (al AppLogger) Error(msg string, fields ...zap.Field) {
-	al.logger.Error(msg, fields...)
+	al.logger.Error(msg, normalizeLogFields(fields)...)
 }
 
 func (al AppLogger) Fatal(msg string, fields ...zap.Field) {
-	al.logger.Fatal(msg, fields...)
+	al.logger.Fatal(msg, normalizeLogFields(fields)...)
 }
 
 func (al AppLogger) Info(msg string, fields ...zap.Field) {
-	al.logger.Info(msg, fields...)
+	al.logger.Info(msg, normalizeLogFields(fields)...)
 }
 
 func (al AppLogger) DPanic(msg string, fields ...zap.Field) {
-	al.logger.DPanic(msg, fields...)
+	al.logger.DPanic(msg, normalizeLogFields(fields)...)
 }
 
 func (al AppLogger) Debug(msg string, fields ...zap.Field) {
-	al.logger.Debug(msg, fields...)
+	al.logger.Debug(msg, normalizeLogFields(fields)...)
+}
+
+func normalizeLogFields(fields []zap.Field) []zap.Field {
+	normalizedFields := make([]zap.Field, len(fields))
+	copy(normalizedFields, fields)
+
+	for i := range normalizedFields {
+		if normalizedFields[i].Key == "error" {
+			normalizedFields[i].Key = "ERROR"
+		}
+	}
+
+	return normalizedFields
 }

@@ -46,6 +46,7 @@ func (t errorHttpTransport) RouterRegister(e *echo.Echo) {
 // - The error page is rendered using the `error.html` template.
 // - Logs errors using the logger.
 func (t errorHttpTransport) ErrorPageTransport(err error, c echo.Context) {
+	originalErr := err
 	var message interface{}
 	code := http.StatusInternalServerError
 
@@ -59,8 +60,8 @@ func (t errorHttpTransport) ErrorPageTransport(err error, c echo.Context) {
 
 	// Attempt to render the custom error page with error details.
 	err = c.Render(code, "error.html", echo.Map{
-		"Code":    code,                  // HTTP status code of the error.
-		"Message": message,               // Error message to display.
+		"Code":    code,    // HTTP status code of the error.
+		"Message": message, // Error message to display.
 		"TemplateData": model.TemplateModel{
 			Title: fmt.Sprintf("Error %d", code), // Set a dynamic title for the error page.
 		},
@@ -68,10 +69,10 @@ func (t errorHttpTransport) ErrorPageTransport(err error, c echo.Context) {
 
 	// Log rendering errors or the original error.
 	if err != nil {
-		t.logger.Error("errorHttpTransport.ErrorPageTransport", zap.Error(err))
+		t.logger.Error("errorHttpTransport.ErrorPageTransport", zap.Error(err), zap.NamedError("ORIGINAL_ERROR", originalErr))
 		return
 	}
 
 	// Log the initial error for debugging purposes.
-	t.logger.Error("errorHttpTransport.ErrorPageTransport", zap.Error(err))
+	t.logger.Error("errorHttpTransport.ErrorPageTransport", zap.Error(originalErr))
 }
