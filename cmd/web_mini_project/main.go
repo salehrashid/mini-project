@@ -8,6 +8,7 @@ import (
 	"github.com/salehrashid/mini-project/internal/app/web_mini_project/transport"
 	util "github.com/salehrashid/mini-project/internal/app/web_mini_project/util"
 	logger "github.com/salehrashid/mini-project/pkg/util"
+	"go.uber.org/zap"
 )
 
 func main() {
@@ -22,7 +23,7 @@ func main() {
 	// The "/assets" route maps to the static files directory.
 	e.Static("/assets", util.GetString("WEB_MINI_PROJECT_FILE_STATICS_PATH", "../../../web/static"))
 
-	// Add middleware to log all HTTP requests for debugging and analysis.
+	// Add custom logger to log all HTTP requests for debugging and analysis.
 	logger, _ := logger.NewAppLogger()
 
 	// Add middleware to recover from panics and log the errors.
@@ -40,5 +41,5 @@ func main() {
 	transport.GetErrorHTTPTransport().RouterRegister(e)
 
 	// Start the HTTP server on the specified port and log any fatal errors.
-	e.Logger.Fatal(e.Start(util.GetPort("DOCKER_WEB_MINI_PROJECT_HOST_PORT")))
+	logger.Fatal("Error when start echo", zap.Error(e.Start(util.GetPort("DOCKER_WEB_MINI_PROJECT_HOST_PORT"))))
 }
